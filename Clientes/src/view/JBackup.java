@@ -5,6 +5,8 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import controller.Backup;
 
@@ -14,6 +16,8 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 
 import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.awt.event.ActionEvent;
 
@@ -22,8 +26,9 @@ public class JBackup extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private Backup backup;
-	ArrayList<String> arquivosBackup;
-	String[] nomesbackup;
+	private ArrayList<String> arquivosBackup;
+	private String[] nomesbackup;
+	private String itemSelecionado;
 	
 	
 	/**
@@ -54,9 +59,7 @@ public class JBackup extends JFrame {
 		contentPane.setLayout(null);
 		
 		
-		JButton btnNewButton_1 = new JButton("Recuperar Backup");
-		btnNewButton_1.setBounds(133, 233, 141, 20);
-		contentPane.add(btnNewButton_1);
+		
 		
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBounds(10, 10, 684, 213);
@@ -88,5 +91,40 @@ public class JBackup extends JFrame {
         });
         btnNewButton.setBounds(8, 233, 115, 20);
         contentPane.add(btnNewButton);
+        
+        JButton btnNewButton_1 = new JButton("Recuperar Backup");
+        btnNewButton_1.setEnabled(false);
+		btnNewButton_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(JOptionPane.showConfirmDialog(btnNewButton,"Deseja gerar o backup?") ==JOptionPane.YES_NO_OPTION) {
+					try {
+						backup.restaurarBackup(itemSelecionado);
+					} catch (FileNotFoundException e1) {
+						e1.printStackTrace();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
+			}
+		});
+		btnNewButton_1.setBounds(133, 233, 141, 20);
+		contentPane.add(btnNewButton_1);
+		
+		list.addListSelectionListener(new ListSelectionListener() {
+			
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+					if(!e.getValueIsAdjusting()) {
+						if(list.getSelectedIndex() == -1) {
+							list.setSelectedIndex(e.getFirstIndex());
+						}
+						itemSelecionado = ((JList<String>)e.getSource()).getSelectedValue();
+						if(itemSelecionado != null) {
+							btnNewButton_1.setEnabled(true);
+						}
+					}
+			}
+		});
+		
     }
 }

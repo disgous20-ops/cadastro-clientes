@@ -9,7 +9,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+
+import javax.swing.JOptionPane;
 
 public class Backup {
 
@@ -84,7 +87,7 @@ public class Backup {
 				e.printStackTrace();
 			}
         }
-        
+        JOptionPane.showConfirmDialog(null, "Backup gerado");
     }
         private void adicionarAoZip(String caminhoZip, String diretorioPath, ZipOutputStream zip) throws IOException {
             File diretorio = new File(diretorioPath);
@@ -112,8 +115,44 @@ public class Backup {
 
                 fileInputStream.close();
             }
+                     
         }
-    }
+        
+        public void restaurarBackup(String caminhoArquivoZip) throws FileNotFoundException, IOException {
+            byte[] buffer = new byte[1024];
+
+            try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(caminhoArquivoZip))) {
+                ZipEntry entry;
+
+                while ((entry = zipInputStream.getNextEntry()) != null) {
+                    String nomeArquivo = entry.getName();
+                    File arquivo = new File(pathAbsolutoParcial() + "\\resources" + File.separator + nomeArquivo);
+
+                    if (entry.isDirectory()) {
+                        arquivo.mkdirs();
+                        continue;
+                    }
+
+                    File parent = arquivo.getParentFile();
+
+                    if (!parent.exists()) {
+                        parent.mkdirs();
+                    }
+
+                    try (FileOutputStream fileOutputStream = new FileOutputStream(arquivo)) {
+                    	int i;
+                    	while((i = zipInputStream.read(buffer))>0) {
+                    		fileOutputStream.write(buffer, 0, i);
+                    	}
+                
+                    }
+                    
+                }
+                	JOptionPane.showConfirmDialog(null, "Backup restaurado");
+            }
+            
+        }
+}
 
 
 
